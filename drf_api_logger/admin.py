@@ -114,8 +114,8 @@ if database_log_enabled():
 
         # Admin UI settings
         list_per_page = 20
-        list_display = ('id', 'api', 'user_id', 'method', 'status_code', 'execution_time', 'added_on_time',)
-        list_filter = ('added_on', 'status_code', 'method',)
+        list_display = ('id', 'api', 'user__email', 'method', 'status_code', 'execution_time', 'added_on_time',)
+        list_filter = ('added_on', 'status_code', 'method', 'user__email')
         search_fields = ('body', 'response', 'headers', 'api',)
         readonly_fields = (
             'execution_time', 'client_ip_address', 'api', 'view',
