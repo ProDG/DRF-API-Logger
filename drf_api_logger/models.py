@@ -1,5 +1,10 @@
 from django.db import models
+from django.conf import settings
 from drf_api_logger.utils import database_log_enabled
+
+
+AUTH_USER_MODEL = getattr(settings, "AUTH_USER_MODEL", "auth.User")
+
 
 # Only define and load the models if database logging is enabled in settings.
 if database_log_enabled():
@@ -68,6 +73,12 @@ if database_log_enabled():
             max_length=50
         )
         response = models.TextField()
+        user = models.ForeignKey(
+            AUTH_USER_MODEL,
+            null=True,
+            on_delete=models.SET_NULL,
+        )
+        view = models.CharField(max_length=50)
         status_code = models.PositiveSmallIntegerField(
             help_text='Response status code',
             db_index=True  # Useful for filtering by success/error status

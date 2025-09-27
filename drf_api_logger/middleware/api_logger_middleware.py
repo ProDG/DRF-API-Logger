@@ -12,7 +12,7 @@ from datetime import datetime
 
 from drf_api_logger import API_LOGGER_SIGNAL
 from drf_api_logger.apps import LOGGER_THREAD
-from drf_api_logger.utils import get_headers, get_client_ip, mask_sensitive_data
+from drf_api_logger.utils import get_headers, get_client_ip, mask_sensitive_data, get_view_from_request, get_user
 
 
 class APILoggerMiddleware:
@@ -221,7 +221,9 @@ class APILoggerMiddleware:
                     response=mask_sensitive_data(response_body),
                     status_code=response.status_code,
                     execution_time=time.time() - start_time,
-                    added_on=current_time
+                    added_on=current_time,
+                    view=get_view_from_request(request),
+                    user_id=get_user(request)
                 )
                 if self.DRF_API_LOGGER_DATABASE and LOGGER_THREAD:
                     d = data.copy()
