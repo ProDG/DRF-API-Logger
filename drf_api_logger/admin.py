@@ -103,6 +103,17 @@ if database_log_enabled():
                 if isinstance(settings.DRF_API_LOGGER_TIMEDELTA, int):
                     self._DRF_API_LOGGER_TIMEDELTA = settings.DRF_API_LOGGER_TIMEDELTA
 
+        def get_user_email(self, obj):
+            """
+            Custom method to safely get user email, handling cases where user might be None.
+            """
+            if obj.user:
+                return obj.user.email
+            return '-'
+
+        get_user_email.admin_order_field = 'user__email'
+        get_user_email.short_description = 'User Email'
+
         def added_on_time(self, obj):
             """
             Returns formatted 'added_on' timestamp adjusted by timedelta setting.
@@ -114,9 +125,9 @@ if database_log_enabled():
 
         # Admin UI settings
         list_per_page = 20
-        list_display = ('id', 'api', 'user__email', 'method', 'status_code', 'execution_time', 'added_on_time',)
-        list_filter = ('added_on', 'status_code', 'method', 'user__email')
-        search_fields = ('body', 'response', 'headers', 'api',)
+        list_display = ('id', 'api', 'get_user_email', 'method', 'status_code', 'execution_time', 'added_on_time',)
+        list_filter = ('added_on', 'status_code', 'method', 'user')
+        search_fields = ('body', 'response', 'headers', 'api', 'user__email')  # Keep user__email in search_fields
         readonly_fields = (
             'execution_time', 'client_ip_address', 'api', 'view',
             'headers', 'body', 'method', 'response', 'status_code', 'added_on_time',
@@ -167,7 +178,12 @@ if database_log_enabled():
             drf_api_logger_default_database = 'default'
             if hasattr(settings, 'DRF_API_LOGGER_DEFAULT_DATABASE'):
                 drf_api_logger_default_database = settings.DRF_API_LOGGER_DEFAULT_DATABASE
-            return super(APILogsAdmin, self).get_queryset(request).using(drf_api_logger_default_database)
+
+            return (
+                super(APILogsAdmin, self).get_queryset(request)
+                .using(drf_api_logger_default_database)
+                .select_related('user')
+            )
 
         def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
             """
