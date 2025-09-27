@@ -151,6 +151,6 @@ def get_user(request):
     if hasattr(request, "user") and hasattr(request.user, "is_authenticated"):
         is_authenticated = request.user.is_authenticated
         if is_authenticated:
-            return request.user.id
+            return request.user.pk
     else:
         return None
